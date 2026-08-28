@@ -1,0 +1,121 @@
+{
+  "_comment": "Replayable evidence timeline for the triage agent. Each window is a real read-only snapshot of the same host observed for a different length of time, recorded once and committed so any judge can replay the run with no host access, no root and no API key. The ground_truth block is the held-out answer key: it is NOT reachable through any agent tool, and is read only by scripts/evaluate.py after a run has finished.",
+  "base_snapshot": "fixtures/raw-demo.json",
+  "start_window": "w60",
+  "windows": [
+    {
+      "id": "w0",
+      "trace_backend": "none",
+      "trace_seconds": 0,
+      "cost_seconds": 0,
+      "traced_syscalls": {},
+      "extra_workloads": [],
+      "note": "Configuration only, no tracer available. Syscall usage is unknown rather than absent."
+    },
+    {
+      "id": "w60",
+      "trace_backend": "strace",
+      "trace_seconds": 60,
+      "cost_seconds": 60,
+      "traced_syscalls": {
+        "980": ["accept4", "keyctl"],
+        "1105": ["ioctl"],
+        "1284": ["clone", "io_uring_setup", "keyctl", "setns"],
+        "1622": ["ioctl"],
+        "2011": ["accept4", "epoll_wait", "io_uring_setup"]
+      },
+      "extra_workloads": [],
+      "note": "The snapshot the operator hands over: one minute, midday, business hours."
+    },
+    {
+      "id": "w900",
+      "trace_backend": "perf",
+      "trace_seconds": 900,
+      "cost_seconds": 900,
+      "traced_syscalls": {
+        "980": ["accept4", "keyctl"],
+        "1105": ["ioctl"],
+        "1284": ["clone", "io_uring_setup", "keyctl", "setns"],
+        "1622": ["ioctl"],
+        "2011": ["accept4", "epoll_wait", "io_uring_setup"],
+        "2402": ["perf_event_open", "read"]
+      },
+      "extra_workloads": [
+        {
+          "caps_effective": [],
+          "comm": "node_exporter",
+          "id": "w.node_exporter",
+          "no_new_privs": true,
+          "open_paths": [],
+          "pids": [2402],
+          "seccomp_mode": 0,
+          "uid": 114,
+          "unit": "node-exporter.service"
+        }
+      ],
+      "note": "Fifteen minutes covers one full metrics scrape cycle: node_exporter profiles the host once per cycle via perf_event_open."
+    },
+    {
+      "id": "w86400",
+      "trace_backend": "bcc",
+      "trace_seconds": 86400,
+      "cost_seconds": 86400,
+      "traced_syscalls": {
+        "980": ["accept4", "keyctl"],
+        "1105": ["ioctl"],
+        "1284": ["clone", "io_uring_setup", "keyctl", "setns"],
+        "1622": ["ioctl"],
+        "2011": ["accept4", "epoll_wait", "io_uring_setup"],
+        "2402": ["perf_event_open", "read"],
+        "3310": ["clone", "read", "userfaultfd"]
+      },
+      "extra_workloads": [
+        {
+          "caps_effective": [],
+          "comm": "node_exporter",
+          "id": "w.node_exporter",
+          "no_new_privs": true,
+          "open_paths": [],
+          "pids": [2402],
+          "seccomp_mode": 0,
+          "uid": 114,
+          "unit": "node-exporter.service"
+        },
+        {
+          "caps_effective": ["CAP_21"],
+          "comm": "criu",
+          "id": "w.criu-backup",
+          "no_new_privs": false,
+          "open_paths": [],
+          "pids": [3310],
+          "seccomp_mode": 0,
+          "uid": 0,
+          "unit": "backup-snapshot.service"
+        }
+      ],
+      "note": "A full day covers the 02:30 checkpoint/restore backup, which needs userfaultfd. This is the quiet nightly job that a midday trace cannot see."
+    }
+  ],
+  "ground_truth": {
+    "_comment": "Established by reading the host's systemd timers and scrape configuration, then confirmed over a 7-day observation. Held out from every agent tool.",
+    "used_elements": [
+      "dev.kvm",
+      "mod.usb_storage",
+      "ns.userns_unpriv",
+      "sc.io_uring_setup",
+      "sc.keyctl",
+      "sc.perf_event_open",
+      "sc.userfaultfd"
+    ],
+    "orphaned_elements": [
+      "mod.bluetooth",
+      "mod.dccp",
+      "mod.firewire_core",
+      "mod.legacy_fs",
+      "mod.n_hdlc",
+      "mod.rds",
+      "mod.tipc"
+    ],
+    "note": "sc.perf_event_open is used every 15 minutes by node_exporter; sc.userfaultfd is used once nightly by the 02:30 CRIU backup. Both look orphaned in a 60-second midday trace, and recommending their removal is an outage, not a hardening win."
+  }
+}
