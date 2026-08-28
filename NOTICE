@@ -1,0 +1,37 @@
+surface-warden
+==============
+
+This project derives from kernel-surface-ledger
+(https://github.com/RajvardhanPatil07/kernel-surface-ledger), MIT License,
+by the same author.
+
+Provenance
+----------
+
+The first commit in this repository is an unmodified import of
+kernel-surface-ledger at commit 0b77472. Everything in that commit predates
+the micro1 Frontier Engineering Challenge and was NOT built for it:
+
+  - collector/   read-only Linux evidence collection
+  - engine/      deterministic reachability, attribution, set-cover planning
+  - artifacts/   deterministic artifact templates
+  - explain/     optional narration layer
+  - web/         dashboard
+  - data/        curated weights and CVE map
+  - report.schema.json, fixtures/, and the tests covering the above
+
+Everything after that commit was built during the competition window
+(28-31 August 2026). To see exactly what was added:
+
+    git log --oneline pre-competition-baseline..HEAD
+    git diff --stat pre-competition-baseline..HEAD
+
+The competition work is: the evidence-acquisition agent (agent/), the static
+checklist baseline (baseline/), the evaluation harness (evaluation/), the
+replayable evidence timeline (fixtures/timeline-demo.json), the warden CLI,
+the Makefile, and the documentation in docs/.
+
+License
+-------
+
+MIT, unchanged. See LICENSE.
