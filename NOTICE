@@ -8,7 +8,7 @@ by the same author.
 Provenance
 ----------
 
-The first commit in this repository is an unmodified import of
+The first commit in this repository (094185cd) is an unmodified import of
 kernel-surface-ledger at commit 0b77472. Everything in that commit predates
 the micro1 Frontier Engineering Challenge and was NOT built for it:
 
@@ -21,15 +21,41 @@ the micro1 Frontier Engineering Challenge and was NOT built for it:
   - report.schema.json, fixtures/, and the tests covering the above
 
 Everything after that commit was built during the competition window
-(28-31 August 2026). To see exactly what was added:
+(28-31 August 2026). To see exactly what was added, diff against the import
+commit:
 
-    git log --oneline pre-competition-baseline..HEAD
-    git diff --stat pre-competition-baseline..HEAD
+    git log --oneline 094185cd..HEAD
+    git diff --stat 094185cd..HEAD
 
 The competition work is: the evidence-acquisition agent (agent/), the static
 checklist baseline (baseline/), the evaluation harness (evaluation/), the
 replayable evidence timeline (fixtures/timeline-demo.json), the warden CLI,
 the Makefile, and the documentation in docs/.
+
+For convenience the boundary can also be tagged, after which
+`pre-competition-baseline..HEAD` works in place of `094185cd..HEAD`:
+
+    git tag -a pre-competition-baseline 094185cd \
+      -m "Unmodified import of kernel-surface-ledger@0b77472"
+    git push origin pre-competition-baseline
+
+Verifying the import
+--------------------
+
+Commit 094185cd is timestamped 2026-08-28T15:43Z, which is after the
+challenge kickoff, because that is when the copy was made. Its *contents*
+are byte-identical to kernel-surface-ledger at 0b77472, which predates the
+challenge. That claim is checkable rather than asserted:
+
+    git clone https://github.com/RajvardhanPatil07/kernel-surface-ledger /tmp/ksl
+    git -C /tmp/ksl checkout 0b77472
+    git clone https://github.com/RajvardhanPatil07/surface-warden /tmp/sw
+    git -C /tmp/sw checkout 094185cd
+    diff -r --exclude=.git /tmp/ksl /tmp/sw
+
+The engine is unchanged by the competition work: report.schema.json is a
+frozen contract, and all new outputs are written to separate paths
+(artifacts/runs/, artifacts/evaluation/).
 
 License
 -------
