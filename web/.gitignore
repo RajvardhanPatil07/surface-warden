@@ -1,0 +1,17 @@
+# Dependencies
+node_modules/
+
+# Build output
+dist/
+.output/
+.wrangler/
+.vercel/
+
+# Local env files — real values live in Vercel project settings
+.env
+.env.local
+.env.*.local
+
+# Logs & OS noise
+*.log
+.DS_Store
