@@ -12,6 +12,12 @@ report.json
 !fixtures/demo.json
 !data/reports/report.json
 
+# Submission evidence. The bare `report.json` rule above matches at any
+# depth, which would silently drop the agent's own run outputs. Agent run
+# directories and the measured comparison are deliverables: keep them.
+!artifacts/runs/**/report.json
+!artifacts/evaluation/**/report.json
+
 node_modules/
 web/dist/
 web/.vite/
